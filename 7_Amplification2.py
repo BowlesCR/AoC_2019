@@ -1,4 +1,5 @@
 import fileinput
+from itertools import permutations
 from typing import List
 
 
@@ -94,37 +95,25 @@ def main():
 
         maxOutput: int = 0
 
-        for phaseA in range(5, 10):
-            for phaseB in range(5, 10):
-                if phaseB in [phaseA]:
-                    continue
-                for phaseC in range(5, 10):
-                    if phaseC in [phaseA, phaseB]:
-                        continue
-                    for phaseD in range(5, 10):
-                        if phaseD in [phaseA, phaseB, phaseC]:
-                            continue
-                        for phaseE in range(5, 10):
-                            if phaseE in [phaseA, phaseB, phaseC, phaseD]:
-                                continue
+        for phases in permutations(range(5, 10)):
 
-                            a: IntCode = IntCode(stack[:], phaseA)
-                            a.inpt(0)
-                            b: IntCode = IntCode(stack[:], phaseB)
-                            c: IntCode = IntCode(stack[:], phaseC)
-                            d: IntCode = IntCode(stack[:], phaseD)
-                            e: IntCode = IntCode(stack[:], phaseE)
+            a: IntCode = IntCode(stack[:], phases[0])
+            a.inpt(0)
+            b: IntCode = IntCode(stack[:], phases[1])
+            c: IntCode = IntCode(stack[:], phases[2])
+            d: IntCode = IntCode(stack[:], phases[3])
+            e: IntCode = IntCode(stack[:], phases[4])
 
-                            while True:
-                                b.inpt(a.run())
-                                c.inpt(b.run())
-                                d.inpt(c.run())
-                                e.inpt(d.run())
-                                a.inpt(e.run())
+            while True:
+                b.inpt(a.run())
+                c.inpt(b.run())
+                d.inpt(c.run())
+                e.inpt(d.run())
+                a.inpt(e.run())
 
-                                if e.is_halted():
-                                    maxOutput = max(maxOutput, e.out())
-                                    break
+                if e.is_halted():
+                    maxOutput = max(maxOutput, e.out())
+                    break
 
         print(maxOutput)
 
