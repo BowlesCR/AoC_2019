@@ -1,79 +1,98 @@
 import fileinput
-from typing import List, Dict, Any
+from typing import List
 
 
-def intCode(state: Dict[str, Any]) -> int:
-    while True:
+class IntCode:
 
-        opcode: int = state['stack'][state['pc']] % 100
-        mode1: int = (state['stack'][state['pc']] // 100) % 10
-        mode2: int = (state['stack'][state['pc']] // 1000) % 10
-        mode3: int = (state['stack'][state['pc']] // 10000) % 10
+    def __init__(self, stack: List[int], phase: int):
+        self.stack: List[int] = stack
+        self.input: List[int] = [phase]
+        self.pc: int = 0
+        self.output = None
 
-        param1: int
-        param2: int
-        param3: int
+    def is_halted(self) -> bool:
+        return self.stack[self.pc] == 99
 
-        if opcode in [1, 2, 4, 5, 6, 7, 8]:  # Takes 1+ input params
-            if mode1 == 0:
-                param1: int = state['stack'][state['stack'][state['pc'] + 1]]
-            elif mode1 == 1:
-                param1: int = state['stack'][state['pc'] + 1]
+    def inpt(self, inpt: int):
+        self.input.append(inpt)
 
-        if opcode in [1, 2, 5, 6, 7, 8]:  # Takes 2+ input params
-            if mode2 == 0:
-                param2: int = state['stack'][state['stack'][state['pc'] + 2]]
-            elif mode2 == 1:
-                param2: int = state['stack'][state['pc'] + 2]
+    def out(self) -> int:
+        return self.output
 
-        if opcode in []:  # Takes 3 input params
-            if mode3 == 0:
-                param3: int = state['stack'][state['stack'][state['pc'] + 3]]
-            elif mode3 == 1:
-                param3: int = state['stack'][state['pc'] + 3]
+    def run(self) -> int:
+        while True:
 
-        if opcode == 99:
-            state['halted'] = True
-            break  # halt
-        elif opcode == 1:  # add
-            state['stack'][state['stack'][state['pc'] + 3]] = param1 + param2
-            state['pc'] += 4
-        elif opcode == 2:  # mult
-            state['stack'][state['stack'][state['pc'] + 3]] = param1 * param2
-            state['pc'] += 4
-        elif opcode == 3:  # input
-            state['stack'][state['stack'][state['pc'] + 1]] = state['input'].pop(0)
-            state['pc'] += 2
-        elif opcode == 4:  # output
-            state['pc'] += 2
-            return param1
-        elif opcode == 5:  # Branch neq 0
-            if param1 != 0:
-                state['pc'] = param2
+            opcode: int = self.stack[self.pc] % 100
+            mode1: int = (self.stack[self.pc] // 100) % 10
+            mode2: int = (self.stack[self.pc] // 1000) % 10
+            mode3: int = (self.stack[self.pc] // 10000) % 10
+
+            param1: int
+            param2: int
+            param3: int
+
+            if opcode in [1, 2, 4, 5, 6, 7, 8]:  # Takes 1+ input params
+                if mode1 == 0:
+                    param1: int = self.stack[self.stack[self.pc + 1]]
+                elif mode1 == 1:
+                    param1: int = self.stack[self.pc + 1]
+
+            if opcode in [1, 2, 5, 6, 7, 8]:  # Takes 2+ input params
+                if mode2 == 0:
+                    param2: int = self.stack[self.stack[self.pc + 2]]
+                elif mode2 == 1:
+                    param2: int = self.stack[self.pc + 2]
+
+            if opcode in []:  # Takes 3 input params
+                if mode3 == 0:
+                    param3: int = self.stack[self.stack[self.pc + 3]]
+                elif mode3 == 1:
+                    param3: int = self.stack[self.pc + 3]
+
+            if opcode == 99:
+                break  # halt
+            elif opcode == 1:  # add
+                self.stack[self.stack[self.pc + 3]] = param1 + param2
+                self.pc += 4
+            elif opcode == 2:  # mult
+                self.stack[self.stack[self.pc + 3]] = param1 * param2
+                self.pc += 4
+            elif opcode == 3:  # input
+                self.stack[self.stack[self.pc + 1]] = self.input.pop(0)
+                self.pc += 2
+            elif opcode == 4:  # output
+                self.pc += 2
+                self.output = param1
+                return param1
+            elif opcode == 5:  # Branch neq 0
+                if param1 != 0:
+                    self.pc = param2
+                else:
+                    self.pc += 3
+            elif opcode == 6:  # Branch eq 0
+                if param1 == 0:
+                    self.pc = param2
+                else:
+                    self.pc += 3
+            elif opcode == 7:  # Less than
+                self.stack[self.stack[self.pc + 3]] = int(param1 < param2)
+                self.pc += 4
+            elif opcode == 8:  # Equal
+                self.stack[self.stack[self.pc + 3]] = int(param1 == param2)
+                self.pc += 4
             else:
-                state['pc'] += 3
-        elif opcode == 6:  # Branch eq 0
-            if param1 == 0:
-                state['pc'] = param2
-            else:
-                state['pc'] += 3
-        elif opcode == 7:  # Less than
-            state['stack'][state['stack'][state['pc'] + 3]] = int(param1 < param2)
-            state['pc'] += 4
-        elif opcode == 8:  # Equal
-            state['stack'][state['stack'][state['pc'] + 3]] = int(param1 == param2)
-            state['pc'] += 4
-        else:
-            print(f"Panic! PC: {state['pc']}")
-            print(state['stack'])
-            break
+                print(f"Panic! PC: {self.pc}")
+                print(self.stack)
+                break
+
+    pass
 
 
 def main():
     for line in fileinput.input():
         stack: List[int] = [int(x) for x in line.split(',')]
 
-        output: int = 0
+        maxOutput: int = 0
 
         for phaseA in range(5, 10):
             for phaseB in range(5, 10):
@@ -89,42 +108,25 @@ def main():
                             if phaseE in [phaseA, phaseB, phaseC, phaseD]:
                                 continue
 
-                            state: Dict[str, Dict[str, Any]] = {
-                                'a': {},
-                                'b': {},
-                                'c': {},
-                                'd': {},
-                                'e': {},
-                            }
-                            for s in state:
-                                state[s].update({
-                                    'stack': stack[:],
-                                    'pc': 0
-                                })
-
-                            state['a']['input'] = [phaseA, 0]
-                            state['b']['input'] = [phaseB]
-                            state['c']['input'] = [phaseC]
-                            state['d']['input'] = [phaseD]
-                            state['e']['input'] = [phaseE]
+                            a: IntCode = IntCode(stack[:], phaseA)
+                            a.inpt(0)
+                            b: IntCode = IntCode(stack[:], phaseB)
+                            c: IntCode = IntCode(stack[:], phaseC)
+                            d: IntCode = IntCode(stack[:], phaseD)
+                            e: IntCode = IntCode(stack[:], phaseE)
 
                             while True:
-                                a = intCode(state['a'])
-                                state['b']['input'].append(a)
-                                b = intCode(state['b'])
-                                state['c']['input'].append(b)
-                                c = intCode(state['c'])
-                                state['d']['input'].append(c)
-                                d = intCode(state['d'])
-                                state['e']['input'].append(d)
-                                e = intCode(state['e'])
-                                if state['e'].get('halted'):
-                                    output = max(output, state['a']['input'].pop(0))
-                                    break
-                                else:
-                                    state['a']['input'].append(e)
+                                b.inpt(a.run())
+                                c.inpt(b.run())
+                                d.inpt(c.run())
+                                e.inpt(d.run())
+                                a.inpt(e.run())
 
-        print(output)
+                                if e.is_halted():
+                                    maxOutput = max(maxOutput, e.out())
+                                    break
+
+        print(maxOutput)
 
 
 if __name__ == '__main__':
