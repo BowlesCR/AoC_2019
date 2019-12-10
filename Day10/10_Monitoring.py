@@ -1,10 +1,11 @@
 import fileinput
-from typing import List, Set
+from typing import List, Set, Tuple
 
 
 def main():
     grid: List[str] = []
     maxAsteroids: int = 0
+    maxCoords: tuple
 
     for line in fileinput.input():
         grid.append(line.rstrip())
@@ -13,7 +14,7 @@ def main():
         for x1 in range(len(grid[0])):
             if grid[y1][x1] == '#':
                 count: int = 0
-                blocked: Set[tuple[int, int]] = set()
+                blocked: Set[Tuple[int, int]] = set()
 
                 for rise in sorted(range(0 - y1, len(grid) - y1), key=abs):
                     for run in sorted(range(0 - x1, len(grid) - x1), key=abs):
@@ -32,10 +33,11 @@ def main():
                             y2 += rise
                             x2 += run
 
-                # print(f"  {len(slopes)}")
-                maxAsteroids = max(maxAsteroids, count)
+                if count > maxAsteroids:
+                    maxAsteroids = count
+                    maxCoords = (x1, y1)
 
-    print(maxAsteroids)
+    print(maxAsteroids, maxCoords)
 
 
 if __name__ == '__main__':
