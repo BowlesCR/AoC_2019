@@ -1,3 +1,9 @@
+"""
+Created on Dec 5, 2019
+
+@author: cbowles
+"""
+
 import fileinput
 from typing import List
 
@@ -8,11 +14,11 @@ def main():
     for line in fileinput.input():
         stack: List[int] = [int(x) for x in line.split(',')]
 
-        boost: IntCode = IntCode(stack)
-        boost.inpt(2)
+        intcode = IntCode(stack)
 
-        while not boost.is_halted():
-            print(boost.run())
+        intcode.inpt(5)
+        while not intcode.is_halted():
+            print(intcode.run())
 
 
 if __name__ == '__main__':

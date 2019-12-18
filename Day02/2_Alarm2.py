@@ -7,42 +7,26 @@ Created on Dec 4, 2019
 import fileinput
 from typing import List
 
+from IntCode import IntCode
+
+
 def main():
-  for line in fileinput.input():
+    for line in fileinput.input():
+        stack: List[int] = [int(x) for x in line.split(',')]
 
-    for noun in range(100):
-      for verb in range(100):
+        for noun in range(100):
+            for verb in range(100):
+                intcode = IntCode(stack[:])
 
-        stack: List(int) = [int(x) for x in line.split(',')]
+                intcode.stack[1] = noun
+                intcode.stack[2] = verb
 
-        stack[1] = noun
-        stack[2] = verb
-    
-        pos: int = 0
-        
-        try:
-          while(True):
-            #print(stack)
-            #print(stack[pos:pos+4])
-            if stack[pos] == 99:
-              print(stack[0])
-              break;
-            elif stack[pos] == 1:
-              stack[stack[pos+3]] = stack[stack[pos+1]] + stack[stack[pos+2]]
-            elif stack[pos] == 2:
-              stack[stack[pos+3]] = stack[stack[pos+1]] * stack[stack[pos+2]]
-            else:
-              #print(f'Panic! Pos: {pos}')
-              #print(stack)
-              break;
-            pos += 4
-  
-        except:
-          pass
-          
-        if stack[0] == 19690720:
-          print(100*noun+verb)
-          exit()
+                intcode.run()
+
+                if intcode.stack[0] == 19690720:
+                    print(100 * noun + verb)
+                    exit()
+
 
 if __name__ == '__main__':
     main()

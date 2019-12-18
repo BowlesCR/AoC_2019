@@ -7,32 +7,21 @@ Created on Dec 4, 2019
 import fileinput
 from typing import List
 
+from IntCode import IntCode
+
+
 def main():
-  for line in fileinput.input():
-    stack: List(int) = [int(x) for x in line.split(',')]
+    for line in fileinput.input():
+        stack: List(int) = [int(x) for x in line.split(',')]
 
-    stack[1] = 12
-    stack[2] = 2
+        stack[1] = 12
+        stack[2] = 2
 
-    pos: int = 0
-    
-    
-    while(True):
-      print(stack)
-      print(stack[pos:pos+4])
-      if stack[pos] == 99:
-        print(stack[0])
-        break;
-      elif stack[pos] == 1:
-        stack[stack[pos+3]] = stack[stack[pos+1]] + stack[stack[pos+2]]
-      elif stack[pos] == 2:
-        stack[stack[pos+3]] = stack[stack[pos+1]] * stack[stack[pos+2]]
-      else:
-        print(f'Panic! Pos: {pos}')
-        print(stack)
-      pos += 4
-        
-    
+        intcode = IntCode(stack)
+
+        intcode.run()
+        print(intcode.stack[0])
+
 
 if __name__ == '__main__':
     main()
